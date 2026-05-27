@@ -1,0 +1,5 @@
+com/company/erp/inventory/repository/ProductRepository.class
+com/company/erp/inventory/dto/InventoryUpdateResult.class
+com/company/erp/inventory/service/InventoryService.class
+com/company/erp/inventory/controller/InventoryController.class
+com/company/erp/inventory/entity/Product.class

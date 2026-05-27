@@ -1,0 +1,6 @@
+com/company/erp/core/audit/AuditLog.class
+com/company/erp/core/event/SaleCompletedEvent.class
+com/company/erp/core/event/EventPublisher.class
+com/company/erp/core/security/SecurityConfig.class
+com/company/erp/core/exception/ResourceNotFoundException.class
+com/company/erp/core/audit/AuditService.class
