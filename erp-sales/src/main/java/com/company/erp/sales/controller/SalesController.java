@@ -17,7 +17,13 @@ public class SalesController {
         Long productId = Long.valueOf(request.get("productId").toString());
         int quantity = Integer.parseInt(request.get("quantity").toString());
         
-        com.company.erp.sales.model.Sale sale = salesService.processSale(productId, quantity);
-        return Map.of("status", "SUCCESS", "sale", sale, "message", "Sale processed successfully");
+        try {
+            com.company.erp.sales.model.Sale sale = salesService.processSale(productId, quantity);
+            return Map.of("status", "SUCCESS", "sale", sale, "message", "Sale processed successfully");
+        } catch (IllegalArgumentException e) {
+            return Map.of("status", "ERROR", "message", "product out of stock");
+        } catch (Exception e) {
+            return Map.of("status", "ERROR", "message", e.getMessage());
+        }
     }
 }

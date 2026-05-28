@@ -40,6 +40,23 @@ public class InventoryController {
         response.put("newStock", result.getNewStock());
         return response;
     }
+
+    @PostMapping("/products/{productId}/deduct")
+    public Map<String, Object> deductStock(@PathVariable Long productId, @RequestParam int quantity) {
+        try {
+            inventoryService.deductStock(productId, quantity);
+            return Map.of("status", "SUCCESS", "message", "Stock deducted successfully");
+        } catch (IllegalArgumentException e) {
+            // Spring by default returns 200 with this Map, but we should return a 400 Bad Request
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PostMapping("/products/{productId}/restore")
+    public Map<String, Object> restoreStock(@PathVariable Long productId, @RequestParam int quantity) {
+        inventoryService.restoreStock(productId, quantity);
+        return Map.of("status", "SUCCESS", "message", "Stock restored successfully");
+    }
     @PutMapping("/products/{productId}")
     public com.company.erp.inventory.entity.Product updateProduct(@PathVariable Long productId, @RequestBody com.company.erp.inventory.entity.Product product) {
         return inventoryService.updateProduct(productId, product);

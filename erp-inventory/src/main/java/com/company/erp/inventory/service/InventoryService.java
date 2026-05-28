@@ -53,6 +53,22 @@ public class InventoryService {
         productRepository.delete(existing);
     }
     
+    @Transactional
+    public void deductStock(Long productId, int quantity) {
+        int rowsAffected = productRepository.deductStock(productId, quantity);
+        if (rowsAffected == 0) {
+            throw new IllegalArgumentException("Insufficient stock available for product ID: " + productId);
+        }
+        // Cache invalidation could be handled here
+        redisTemplate.delete("inventory:" + productId);
+    }
+
+    @Transactional
+    public void restoreStock(Long productId, int quantity) {
+        productRepository.restoreStock(productId, quantity);
+        redisTemplate.delete("inventory:" + productId);
+    }
+    
     @Async
     public CompletableFuture<InventoryUpdateResult> updateInventory(Long productId, int quantity) {
         Product product = productRepository.findById(productId)
@@ -77,13 +93,4 @@ public class InventoryService {
         }
     }
 
-    @KafkaListener(topics = "sales-topic", groupId = "inventory-group")
-    public void handleSaleCompleted(SaleCompletedEvent event) {
-        System.out.println("Inventory received SaleCompletedEvent for Product ID: " + event.getProductId());
-        try {
-            updateInventory(event.getProductId(), -event.getQuantitySold());
-        } catch (Exception e) {
-            System.err.println("Failed to update inventory for sale: " + e.getMessage());
-        }
-    }
 }

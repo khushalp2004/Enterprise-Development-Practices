@@ -31,7 +31,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/actuator/**", "/error").permitAll()
+                .requestMatchers("/api/auth/**", "/actuator/**", "/error", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // Require ADMIN role for HR and Accounting for demonstration
                 .requestMatchers("/api/hr/**").hasRole("ADMIN")
                 .requestMatchers("/api/accounting/**").hasRole("ADMIN")

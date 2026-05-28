@@ -51,6 +51,26 @@ services:
     networks:
       - erp-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: erp-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - erp-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: erp-grafana
+    ports:
+      - "3001:3000"
+    networks:
+      - erp-network
+    depends_on:
+      - prometheus
+
 volumes:
   pgdata:
   redisdata:

@@ -4,6 +4,7 @@ import com.company.erp.core.event.EventPublisher;
 import com.company.erp.core.event.SaleCompletedEvent;
 import com.company.erp.sales.model.Sale;
 import com.company.erp.sales.repository.SaleRepository;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,9 @@ public class SalesService {
     @Transactional
     public Sale processSale(Long productId, int quantity) {
         String inventoryUrl = "http://localhost:8080/api/inventory/products/" + productId;
+        String deductUrl = inventoryUrl + "/deduct?quantity=" + quantity;
+        String restoreUrl = inventoryUrl + "/restore?quantity=" + quantity;
+
         ProductDto product = null;
         try {
             // Get current authorization token
@@ -46,21 +50,51 @@ public class SalesService {
             }
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
+            // 1. Fetch product to get price
             ResponseEntity<ProductDto> response = restTemplate.exchange(inventoryUrl, HttpMethod.GET, entity, ProductDto.class);
             product = response.getBody();
             if (product == null) {
                 throw new RuntimeException("Product not found");
             }
+
+            // 2. Synchronously deduct inventory
+            ResponseEntity<Map> deductResponse = restTemplate.exchange(deductUrl, HttpMethod.POST, entity, Map.class);
+            // If the deduction fails, it will throw an exception caught below (e.g. 400 Bad Request)
+
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            if (e.getStatusCode().is4xxClientError()) {
+                throw new IllegalArgumentException("Not enough stock available for product ID: " + productId);
+            }
+            throw new RuntimeException("Failed to fetch/deduct product details: " + e.getMessage());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch product details: " + e.getMessage());
+            throw new RuntimeException("Failed to fetch/deduct product details: " + e.getMessage());
         }
 
         double pricePerItem = product.getPrice();
         double totalAmount = quantity * pricePerItem;
         
         Sale sale = new Sale(productId, quantity, totalAmount, System.currentTimeMillis());
-        sale = saleRepository.save(sale);
+        try {
+            // 3. Save sale locally
+            sale = saleRepository.save(sale);
+        } catch (Exception e) {
+            // Rollback inventory deduction using Saga compensation
+            try {
+                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+                String authHeader = request.getHeader("Authorization");
+                HttpHeaders headers = new HttpHeaders();
+                if (authHeader != null) {
+                    headers.set("Authorization", authHeader);
+                }
+                HttpEntity<String> entity = new HttpEntity<>(headers);
+                restTemplate.exchange(restoreUrl, HttpMethod.POST, entity, Map.class);
+            } catch (Exception restoreException) {
+                System.err.println("CRITICAL: Failed to restore inventory after sale save failure. productId: " + productId + " quantity: " + quantity);
+            }
+            throw new RuntimeException("Failed to save sale transaction. Inventory restored.");
+        }
         
+        // 4. Publish event for analytics, etc. (Inventory deduction is already handled above)
         SaleCompletedEvent event = new SaleCompletedEvent(sale.getId(), productId, quantity, totalAmount);
         eventPublisher.publishSaleCompletedEvent(event);
         
@@ -71,9 +105,13 @@ public class SalesService {
     public static class ProductDto {
         private Long id;
         private double price;
+        private int stockQuantity;
+
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
         public double getPrice() { return price; }
         public void setPrice(double price) { this.price = price; }
+        public int getStockQuantity() { return stockQuantity; }
+        public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
     }
 }
