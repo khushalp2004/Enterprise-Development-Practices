@@ -32,7 +32,7 @@ public class SalesService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Transactional
-    public String processSale(Long productId, int quantity) {
+    public Sale processSale(Long productId, int quantity) {
         String inventoryUrl = "http://localhost:8080/api/inventory/products/" + productId;
         ProductDto product = null;
         try {
@@ -64,7 +64,7 @@ public class SalesService {
         SaleCompletedEvent event = new SaleCompletedEvent(sale.getId(), productId, quantity, totalAmount);
         eventPublisher.publishSaleCompletedEvent(event);
         
-        return "Sale processed successfully. Total: $" + totalAmount;
+        return sale;
     }
 
     // Inner class for deserializing the product from inventory

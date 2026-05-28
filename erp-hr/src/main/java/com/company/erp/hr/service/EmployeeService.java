@@ -26,6 +26,22 @@ public class EmployeeService {
         return employees;
     }
 
+    public EmployeeDTO updateEmployee(Long id, CreateEmployeeRequest request) {
+        for (EmployeeDTO emp : employees) {
+            if (emp.getId().equals(id)) {
+                emp.setFirstName(request.getFirstName());
+                emp.setLastName(request.getLastName());
+                emp.setDepartment(request.getDepartment());
+                return emp;
+            }
+        }
+        throw new RuntimeException("Employee not found");
+    }
+
+    public void deleteEmployee(Long id) {
+        employees.removeIf(emp -> emp.getId().equals(id));
+    }
+
     public Object generateReport(String reportType, Object startDate, Object endDate) {
         return new Object();
     }

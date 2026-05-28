@@ -39,6 +39,20 @@ public class InventoryService {
         return productRepository.save(product);
     }
     
+    public Product updateProduct(Long id, Product updatedProduct) {
+        Product existing = getProduct(id);
+        existing.setName(updatedProduct.getName());
+        existing.setPrice(updatedProduct.getPrice());
+        existing.setStockQuantity(updatedProduct.getStockQuantity());
+        existing.setLastUpdated(LocalDateTime.now());
+        return productRepository.save(existing);
+    }
+    
+    public void deleteProduct(Long id) {
+        Product existing = getProduct(id);
+        productRepository.delete(existing);
+    }
+    
     @Async
     public CompletableFuture<InventoryUpdateResult> updateInventory(Long productId, int quantity) {
         Product product = productRepository.findById(productId)

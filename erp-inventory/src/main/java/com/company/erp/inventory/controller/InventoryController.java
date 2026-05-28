@@ -40,4 +40,13 @@ public class InventoryController {
         response.put("newStock", result.getNewStock());
         return response;
     }
+    @PutMapping("/products/{productId}")
+    public com.company.erp.inventory.entity.Product updateProduct(@PathVariable Long productId, @RequestBody com.company.erp.inventory.entity.Product product) {
+        return inventoryService.updateProduct(productId, product);
+    }
+
+    @DeleteMapping("/products/{productId}")
+    public void deleteProduct(@PathVariable Long productId) {
+        inventoryService.deleteProduct(productId);
+    }
 }

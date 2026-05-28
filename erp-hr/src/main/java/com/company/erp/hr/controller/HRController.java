@@ -32,4 +32,18 @@ public class HRController {
         auditService.logAudit("CREATE_EMPLOYEE", "Created employee: " + employee.getFirstName() + " " + employee.getLastName(), employee.getId());
         return employee;
     }
+    @PutMapping("/employees/{id}")
+    @AuditLog(action = "UPDATE_EMPLOYEE")
+    public EmployeeDTO updateEmployee(@PathVariable Long id, @RequestBody CreateEmployeeRequest request) {
+        EmployeeDTO employee = employeeService.updateEmployee(id, request);
+        auditService.logAudit("UPDATE_EMPLOYEE", "Updated employee: " + employee.getFirstName() + " " + employee.getLastName(), employee.getId());
+        return employee;
+    }
+
+    @DeleteMapping("/employees/{id}")
+    @AuditLog(action = "DELETE_EMPLOYEE")
+    public void deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteEmployee(id);
+        auditService.logAudit("DELETE_EMPLOYEE", "Deleted employee ID: " + id, id);
+    }
 }
