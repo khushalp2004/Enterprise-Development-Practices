@@ -16,9 +16,8 @@ public class SalesController {
     public Map<String, String> checkout(@RequestBody Map<String, Object> request) {
         Long productId = Long.valueOf(request.get("productId").toString());
         int quantity = Integer.parseInt(request.get("quantity").toString());
-        double price = Double.parseDouble(request.get("price").toString());
         
-        String result = salesService.processSale(productId, quantity, price);
+        String result = salesService.processSale(productId, quantity);
         return Map.of("status", "SUCCESS", "message", result);
     }
 }

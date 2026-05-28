@@ -13,6 +13,7 @@ public class Product {
     private Long id;
     private String name;
     private int stockQuantity;
+    private double price;
     private LocalDateTime lastUpdated;
     @Version
     private Long version;
@@ -23,6 +24,8 @@ public class Product {
     public void setName(String name) { this.name = name; }
     public int getStockQuantity() { return stockQuantity; }
     public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
+    public double getPrice() { return price; }
+    public void setPrice(double price) { this.price = price; }
     public LocalDateTime getLastUpdated() { return lastUpdated; }
     public void setLastUpdated(LocalDateTime lastUpdated) { this.lastUpdated = lastUpdated; }
     public Long getVersion() { return version; }

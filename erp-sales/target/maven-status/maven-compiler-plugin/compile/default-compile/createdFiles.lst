@@ -2,3 +2,4 @@ com/company/erp/sales/model/Sale.class
 com/company/erp/sales/service/SalesService.class
 com/company/erp/sales/repository/SaleRepository.class
 com/company/erp/sales/controller/SalesController.class
+com/company/erp/sales/service/SalesService$ProductDto.class

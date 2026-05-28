@@ -30,6 +30,7 @@ public class ReportingController {
         metrics.put("totalEmployees", employeeService.getAllEmployees().size());
         metrics.put("activeProducts", productRepository.count());
         metrics.put("totalRevenue", accountingService.getTotalRevenue());
+        metrics.put("totalSalesCount", accountingService.getLedger().size());
         
         return metrics;
     }

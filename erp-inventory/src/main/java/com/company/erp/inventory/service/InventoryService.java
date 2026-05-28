@@ -24,6 +24,21 @@ public class InventoryService {
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
     
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+    
+    public Product getProduct(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+    }
+    
+    public Product addProduct(Product product) {
+        product.setLastUpdated(LocalDateTime.now());
+        // Version is managed by JPA (@Version), but stock and price should be passed
+        return productRepository.save(product);
+    }
+    
     @Async
     public CompletableFuture<InventoryUpdateResult> updateInventory(Long productId, int quantity) {
         Product product = productRepository.findById(productId)

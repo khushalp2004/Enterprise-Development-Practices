@@ -1,6 +1,13 @@
-com/company/erp/core/audit/AuditLog.class
+com/company/erp/core/security/AuthResponse.class
+com/company/erp/core/security/JwtUtil.class
 com/company/erp/core/event/SaleCompletedEvent.class
-com/company/erp/core/event/EventPublisher.class
-com/company/erp/core/security/SecurityConfig.class
+com/company/erp/core/security/JwtAuthenticationFilter.class
+com/company/erp/core/security/AppUserRepository.class
+com/company/erp/core/security/AppUser.class
+com/company/erp/core/security/AuthController.class
 com/company/erp/core/exception/ResourceNotFoundException.class
+com/company/erp/core/event/EventPublisher.class
+com/company/erp/core/security/AuthRequest.class
+com/company/erp/core/security/SecurityConfig.class
+com/company/erp/core/audit/AuditLog.class
 com/company/erp/core/audit/AuditService.class
