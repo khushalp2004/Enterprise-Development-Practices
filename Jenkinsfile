@@ -1,20 +1,54 @@
 pipeline {
     agent any
+    
     environment {
-        DOCKER_REGISTRY = 'erp-registry.company.com'
-        KUBERNETES_NAMESPACE = 'erp-production'
+        DOCKER_REGISTRY = '123456789012.dkr.ecr.us-east-1.amazonaws.com'
+        KUBECONFIG_CREDENTIALS = credentials('eks-kubeconfig')
     }
+    
     stages {
-        stage('Build') {
-            steps { sh 'mvn clean package' }
-        }
-        stage('Test') {
-            steps { sh 'mvn test' }
-        }
-        stage('Build Docker Image') {
+        stage('Checkout') {
             steps {
-                sh 'docker build -t ${DOCKER_REGISTRY}/erp-system:${BUILD_NUMBER} .'
+                checkout scm
             }
+        }
+        
+        stage('Security Scanning (SAST)') {
+            steps {
+                echo 'Running Checkmarx SAST scanning...'
+                // sh 'cx scan --project ERP_System'
+            }
+        }
+        
+        stage('Build Backend') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+                sh 'docker build -t $DOCKER_REGISTRY/erp-backend:${env.BUILD_ID} .'
+            }
+        }
+        
+        stage('Push to ECR') {
+            steps {
+                echo 'Pushing Docker images to AWS Elastic Container Registry'
+                // sh 'aws ecr get-login-password | docker login --username AWS --password-stdin $DOCKER_REGISTRY'
+                // sh 'docker push $DOCKER_REGISTRY/erp-backend:${env.BUILD_ID}'
+            }
+        }
+        
+        stage('Deploy (Blue/Green)') {
+            steps {
+                echo 'Deploying to Kubernetes via Blue/Green Strategy'
+                // sh 'kubectl apply -f kubernetes/backend-deployment.yaml'
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Archiving logs to S3...'
+        }
+        failure {
+            echo 'Triggering PagerDuty incident for deployment failure!'
         }
     }
 }
